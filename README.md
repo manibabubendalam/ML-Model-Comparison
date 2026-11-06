@@ -48,6 +48,24 @@ Because the target has 7 classes, **Precision, Recall and F1 are macro-averaged*
 
 Hyperparameters: Logistic Regression `max_iter=2000`; Decision Tree `max_depth=10, min_samples_leaf=5`; KNN `n_neighbors=7`; Gaussian Naive Bayes defaults; SVM RBF kernel with `C=10`.
 
+## Streamlit app
+
+Run it locally (after `pip install -r requirements.txt`):
+
+```bash
+streamlit run app.py
+```
+
+Features:
+
+- **CSV upload** of the test data. A sample `test_data.csv` can be downloaded from the sidebar.
+- **Model selection** dropdown for the five classifiers.
+- **Evaluation metrics** (Accuracy, AUC, Precision, Recall, F1, MCC) for the selected model.
+- **Confusion matrix** (counts or row-normalised) and **classification report**.
+- **Compare all models** tab: the metrics of all five models on the uploaded data, side by side.
+
+The uploaded CSV must contain the 16 feature columns and the `Class` column. The app loads the saved models from `model/` and only predicts. It does not retrain.
+
 ## Planned structure
 
 ```
