@@ -5,7 +5,9 @@ Machine Learning, Assignment 2 (M.Tech AIML, BITS Pilani WILP).
 Five classification models (Logistic Regression, Decision Tree, KNN, Naive Bayes, SVM) are trained on one
 dataset, compared on six evaluation metrics, and served through a Streamlit web app.
 
-> Work in progress. This README is filled in as the project grows.
+## Problem statement
+
+Dry beans are sold by variety, and sorting them by hand is slow and inconsistent. The task is to predict the **variety of a dry bean (7 classes)** from 16 shape measurements taken from a photograph of each grain. The aim is to implement five classification algorithms on one dataset, compare them on Accuracy, AUC, Precision, Recall, F1 and MCC, and pick the best one for this problem.
 
 ## Dataset description
 
@@ -32,6 +34,11 @@ The data is split 80/20 with stratification (`random_state=42`), so every class 
 
 Both steps are done by [`train_models.py`](train_models.py).
 
+## GitHub repository and live app
+
+- **GitHub repository:** <https://github.com/manibabubendalam/ML-Model-Comparison>
+- **Live Streamlit app:** <https://manibabubendalam-ml-model-comparision.streamlit.app/>
+
 ## Models used
 
 All five models are scikit-learn Pipelines trained on the same 80% training split and saved to [`model/`](model/) with `joblib`. The scaler is saved inside each Pipeline, so no separate preprocessing step is needed at prediction time. The metrics below are calculated on the 20% hold-out set and also saved to [`model/metrics.csv`](model/metrics.csv).
@@ -47,6 +54,17 @@ Because the target has 7 classes, **Precision, Recall and F1 are macro-averaged*
 | Support Vector Machine | **0.9243** | 0.9946 | **0.9372** | **0.9350** | **0.9361** | **0.9085** |
 
 Hyperparameters: Logistic Regression `max_iter=2000`; Decision Tree `max_depth=10, min_samples_leaf=5`; KNN `n_neighbors=7`; Gaussian Naive Bayes defaults; SVM RBF kernel with `C=10`.
+
+### Observations
+
+| ML Model Name | Observation about model performance |
+|---|---|
+| Logistic Regression | Reaches 92.1% accuracy and the best AUC of the five (0.9948), despite being a linear model. After scaling, the bean varieties are close to linearly separable in this feature space. It is the fastest to train and its saved file is tiny (about 3 KB). Its weakest class is Sira (F1 0.864), which it mixes up with Dermason. |
+| Decision Tree | Lowest accuracy of the four stronger models (90.6%) and a clearly lower AUC (0.978). Its probability estimates are coarse because each leaf gives a hard vote. Depth was limited to 10 to curb overfitting. It is easy to interpret and needs no scaling, but it is less accurate than the smoother models. |
+| KNN | 91.4% accuracy, between the Decision Tree and Logistic Regression. It depends on feature scaling and must keep the whole training set, so its saved file is the largest (about 1.5 MB) and prediction cost grows with the data size. It handles the clearly distinct classes well but is not better than the linear model on the overlapping ones. |
+| Naive Bayes | By far the weakest, at 76.4% accuracy and an MCC of 0.715. Many of the 16 features are strongly correlated (Area, Perimeter, ConvexArea, EquivDiameter and the axis lengths), which breaks the independence assumption, and the features are not Gaussian. Barbunya (F1 0.548) is hit hardest. Its AUC (0.967) is still high, so the probability ranking is reasonable while the final class decision is poor. |
+| Support Vector Machine | Best on Accuracy (92.4%), Precision, Recall, F1 and MCC. The RBF kernel captures non-linear boundaries between similar-looking beans. It improves on Logistic Regression only slightly (+0.3 points of accuracy) and costs more to train. The remaining errors are mostly Sira vs Dermason (53 and 43 misclassifications) and Barbunya vs Cali. |
+| **Overall winner** | **Support Vector Machine** has the best Accuracy, Precision, Recall, F1 and MCC. **Logistic Regression** is a very close second, with the highest AUC, and is much cheaper to train and store. Naive Bayes is clearly unsuitable for this feature set. Bombay is classified perfectly (F1 1.0) by all five models, and Sira vs Dermason is the main source of error for every model. |
 
 ## Streamlit app
 
@@ -66,7 +84,7 @@ Features:
 
 The uploaded CSV must contain the 16 feature columns and the `Class` column. The app loads the saved models from `model/` and only predicts. It does not retrain.
 
-## Planned structure
+## Repository structure
 
 ```
 ML-Model-Comparison/
@@ -76,8 +94,8 @@ ML-Model-Comparison/
 ├── requirements.txt
 ├── README.md
 ├── test_data.csv        # hold-out set used for evaluation
-├── data/                # dataset
-└── model/               # saved trained models
+├── data/dry_bean.csv    # full dataset
+└── model/               # saved trained models + metrics.csv
 ```
 
 ## Setup
